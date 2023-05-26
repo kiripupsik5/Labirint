@@ -17,6 +17,22 @@ background = pygame.transform.scale(background, (WIN_WIDTH, WIN_HEIGHT))
 window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 clock = pygame.time.Clock()
 
+class GameSprite(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, image):
+        super().__init__()
+        self.rect = pygame.Rect(x, y, width, height)
+        self.image = pygame.image.load(file_path(image))
+        self.image = pygame.transform.scale(self.image, (width, height))
+
+    def show(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+walls = pygame.sprite.Group()
+wall1 = GameSprite(100, 100, 5, 300, r"images_labirint\whiteFon walls.jpg")
+walls.add(wall1)
+wall2 = GameSprite(150, 150, 25, 5, r"images_labirint\whiteFon walls.jpg")
+walls.add(wall2)
+
 level = 1
 
 game = True
@@ -27,6 +43,7 @@ while game:
 
     if level == 1:
         window.blit(background, (0, 0))
+        walls.draw(window)
 
     clock.tick(FPS)
     pygame.display.update()
