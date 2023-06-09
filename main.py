@@ -27,9 +27,25 @@ class GameSprite(pygame.sprite.Sprite):
     def show(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-player = GameSprite(15, 15, 50, 25, r"images_labirint\player.png")
-enemy1 = GameSprite(25, 25, 50, 25, r"images_labirint\enemy.png")
-finish = GameSprite(25, 25, 50, 25, r"images_labirint\finish.png")
+class Player(GameSprite):
+    def __init__(self, x, y, width, height, image, speed_x, speed_y):
+        super().__init__(x, y, width, height, image)
+        self.speed_x = speed_x
+        self.speed_y = speed_y
+        self.direction = "left"
+        self.image_l = self.image
+        self.image_r = pygame.transform.flip(self.image, True, False)
+
+    def update(self):
+        if self.speed_x < 0 and self.rect.left > 0 or self.speed_x > 0 and self.rect.right < WIN_WIDTH:
+            self.rect.x += self.speed_x
+        if self.speed_y < 0 and self.rect.top > 0 or self.speed_y > 0 and self.rect.bottom < WIN_HEIGHT:
+            self.rect.y += self.speed_y
+
+
+player = Player(15, 15, 15, 15, r"images_labirint\player.png", 0, 0)
+enemy1 = GameSprite(155, 155, 15, 15, r"images_labirint\enemy.png")
+finish = GameSprite(555, 555, 15, 15, r"images_labirint\finish.png")
 
 #название стен_расположение стен v-vertical,  h-horizontal_номер рядка в котором расположенны стены_номер редактируемой стены
 walls = pygame.sprite.Group()
@@ -383,11 +399,37 @@ while game:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
+        if level == 1:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    player.speed_x = -2.5
+                    player.direction = "left"
+                    player.image_l = player.image_l
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    player.speed_x = 2.5
+                    player.direction = "right"
+                    player.image_l = player.image_l
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    player.speed_y = 2.5
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    player.speed_y = -2.5
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    player.speed_x = 0
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    player.speed_x = 0
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    player.speed_y = 0
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
+                    player.speed_y = 0
+
+
 
     if level == 1:
         window.blit(background, (0, 0))
         walls.draw(window)
         player.show()
+        player.update()     
         enemy1.show()
         finish.show()
 
