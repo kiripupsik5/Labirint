@@ -27,6 +27,10 @@ class GameSprite(pygame.sprite.Sprite):
     def show(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
+player = GameSprite(15, 15, 50, 25, r"images_labirint\player.png")
+enemy1 = GameSprite(25, 25, 50, 25, r"images_labirint\enemy.png")
+finish = GameSprite(25, 25, 50, 25, r"images_labirint\finish.png")
+
 #название стен_расположение стен v-vertical,  h-horizontal_номер рядка в котором расположенны стены_номер редактируемой стены
 walls = pygame.sprite.Group()
 wall_v_1_1 = GameSprite(560, 0, 5, 40, r"images_labirint\whiteFon walls.jpg")
@@ -372,14 +376,6 @@ walls.add(wall_v_15_3)
 wall_v_15_4 = GameSprite(520, 560, 5, 40, r"images_labirint\whiteFon walls.jpg")
 walls.add(wall_v_15_4)
 
-
-
-
-
-
-
-
-
 level = 1
 
 game = True
@@ -391,6 +387,9 @@ while game:
     if level == 1:
         window.blit(background, (0, 0))
         walls.draw(window)
+        player.show()
+        enemy1.show()
+        finish.show()
 
     clock.tick(FPS)
     pygame.display.update()
