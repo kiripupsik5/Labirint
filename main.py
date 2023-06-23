@@ -69,13 +69,61 @@ class Player(GameSprite):
                 self.rect.bottom = min(self.rect.bottom, self.rect.top)
 
 
+
+class Enemy(GameSprite):
+    def __init__(self, x, y, width, height, image, direction, min_XYZ, max_XYZ, speed):
+        super().__init__(x, y, width, height, image)
+        self.direction = direction
+        self.min_XYZ = min_XYZ
+        self.max_XYZ = max_XYZ
+        self.speed = speed
+
+        if self.direction == "right":
+            self.image_r = self.image
+            self.image_l = pygame.transform.flip(self.image, True, False)
+        
+        elif self.direction == "left":
+            self.image_l = self.image
+            self.image_r = pygame.transform.flip(self.image, True, False)
+
+    def update(self):
+        if self.direction == "left" or self.direction == "right":
+            if self.direction == "left":
+                self.rect.x -= self.speed
+            
+            elif self.direction == "right":
+                self.rect.x += self.speed
+
+            if self.rect.right >= self.max_XYZ:
+                self.direction = "left"
+                self.image = self.image_l
+
+            if self.rect.left <= self.min_XYZ:
+                self.direction = "right"
+                self.image = self.image_r
+            
+        elif self.direction == "up" or self.direction == "down":
+            if self.direction == "up":
+                self.rect.y -= self.speed
+            
+            elif self.direction == "down":
+                self.rect.y += self.speed
+            
+            if self.rect.top <= self.min_XYZ:
+                self.direction = "down"
+
+            if self.rect.bottom >= self.max_XYZ:
+                self.direction = "up"
+
+
+
 player = Player(15, 15, 15, 15, r"images_labirint\player.png", 0, 0)
 finish = GameSprite(555, 555, 15, 15, r"images_labirint\finish.png")
 
 enemies = pygame.sprite.Group()
 
-enemy1 = GameSprite(170, 155, 15, 15, r"images_labirint\enemy.png")
-enemy2 = GameSprite(275, 155, 15, 15, r"images_labirint\enemy.png")
+enemy1 = Enemy(12, 215, 15, 15, r"images_labirint\enemy.png", "down", 215, 505, 3)
+enemy2 = Enemy(95, 12, 15, 15, r"images_labirint\enemy.png", "right", 95, 305, 3)
 enemies.add(enemy1)
 enemies.add(enemy2)
 
@@ -464,6 +512,7 @@ while game:
         player.show()
         player.update()     
         enemies.draw(window)
+        enemies.update()
         finish.show()
 
         if pygame.sprite.collide_rect(player, finish):
