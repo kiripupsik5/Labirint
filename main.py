@@ -124,8 +124,11 @@ enemies = pygame.sprite.Group()
 
 enemy1 = Enemy(12, 215, 15, 15, r"images_labirint\enemy.png", "down", 215, 505, 3)
 enemy2 = Enemy(95, 12, 15, 15, r"images_labirint\enemy.png", "right", 95, 305, 3)
+enemy3 = Enemy(500, 485, 15, 15, r"images_labirint\enemy.png", "right", 485, 555, 3)
 enemies.add(enemy1)
 enemies.add(enemy2)
+enemies.add(enemy3)
+
 
 
 #название стен_расположение стен v-vertical,  h-horizontal_номер рядка в котором расположенны стены_номер редактируемой стены
