@@ -11,9 +11,19 @@ WIN_WIDTH = 600
 WIN_HEIGHT = 600
 FPS = 60
 
-pygame.mixer_music.load(file_path(r"musics_labirint\fon1.mp3"))
-pygame.mixer_music.set_volume(0.25)
+BLACK = (0, 0, 0)
+GREEN = (15, 245, 7)
+PINK = (245, 7, 130)
+WHITE = (255, 255, 255)
+BLUE = (47, 0, 255)
+
+
+pygame.mixer_music.load(file_path(r"musics_labirint\win1.mp3"))
+pygame.mixer_music.set_volume(0.05)
 pygame.mixer_music.play(-1)
+
+music_shoot = pygame.mixer.Sound(file_path(r"musics_labirint\shoot1.ogg"))
+music_shoot.set_volume(0.25)
 
 background = pygame.image.load(file_path(r"images_labirint\black fon.jpg"))
 background = pygame.transform.scale(background, (WIN_WIDTH, WIN_HEIGHT))
@@ -26,6 +36,21 @@ lose_image = pygame.transform.scale(lose_image, (WIN_WIDTH, WIN_HEIGHT))
 
 window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 clock = pygame.time.Clock()
+
+class Button():
+    def __init__(self, x, y, width, height, background_color, action_color, text, text_color, text_x, text_y):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.background_color = background_color
+        self.action_color = action_color
+        self.color = background_color
+        shrift = pygame.font.SysFont("Helvetica", 55)
+        self.text = shrift.render(text, True, text_color)
+        self.text_x = text_x
+        self.text_y = text_y
+
+    def show(self):
+        pygame.draw.rect(window, self.color, self.rect)
+        window.blit(self.text, (self.rect.x + self.text_x, self.rect.y + self.text_y))
 
 class GameSprite(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image):
@@ -45,6 +70,15 @@ class Player(GameSprite):
         self.direction = "left"
         self.image_l = self.image
         self.image_r = pygame.transform.flip(self.image, True, False)
+
+    def shoot(self):
+        if self.direction == "right":
+            bullet = Bullet(self.rect.right, self.rect.centery, 3, 3, r"images_labirint\bullet.png", 7)
+        elif self.direction == "left":
+            bullet = Bullet(self.rect.left - 3, self.rect.centery, 3, 3, r"images_labirint\bullet.png", -7)
+            bullet.image = pygame.transform.flip(bullet.image, True, False)
+
+        bullets.add(bullet)
 
     def update(self):
         if self.speed_x < 0 and self.rect.left > 0 or self.speed_x > 0 and self.rect.right < WIN_WIDTH:
@@ -66,7 +100,19 @@ class Player(GameSprite):
                 self.rect.top = max(self.rect.top, wall.rect.bottom)
         if self.speed_y > 0:
             for wall in walls_touched:
-                self.rect.bottom = min(self.rect.bottom, self.rect.top)
+                self.rect.bottom = min(self.rect.bottom, wall.rect.top)
+
+class Bullet(GameSprite):
+    def __init__(self, x, y, width, height, image, speed_bullet):
+        super().__init__(x, y, width, height, image)
+        self.speed_bullet = speed_bullet
+
+    def update(self):
+        self.rect.x += self.speed_bullet
+        if self.rect.left >= WIN_WIDTH or self.rect.right <= 0:
+            self.kill()
+
+
 
 
 
@@ -128,6 +174,10 @@ enemy3 = Enemy(500, 485, 15, 15, r"images_labirint\enemy.png", "right", 485, 555
 enemies.add(enemy1)
 enemies.add(enemy2)
 enemies.add(enemy3)
+
+
+
+bullets = pygame.sprite.Group()
 
 
 
@@ -476,13 +526,19 @@ walls.add(wall_v_15_3)
 wall_v_15_4 = GameSprite(520, 560, 5, 40, r"images_labirint\whiteFon walls.jpg")
 walls.add(wall_v_15_4)
 
-level = 1
+btn_start = Button(200, 200, 200, 100, GREEN, BLUE, "START", PINK, 30, 20)
+btn_settings = Button(100, 325, 400, 100, GREEN, BLUE, "SETTINGS", PINK, 85, 20)
+btn_exit = Button(200, 450, 200, 100, GREEN, BLUE, "EXIT", PINK, 50, 20)
+game_name = pygame.font.SysFont("Arial", 105, 1).render("POTOM", True, WHITE)
+
+level = 0
 
 game = True
 while game:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
+
         if level == 1:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
@@ -497,6 +553,9 @@ while game:
                     player.speed_y = 2.5
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
                     player.speed_y = -2.5
+                if event.key == pygame.K_SPACE:
+                    player.shoot()
+                    music_shoot.play()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     player.speed_x = 0
@@ -507,7 +566,33 @@ while game:
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
                     player.speed_y = 0
 
+        elif level == 0:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if btn_start.rect.collidepoint(x, y):
+                    level = 1
+                    pygame.mixer_music.load(file_path(r"musics_labirint\fon1.mp3"))
+                    pygame.mixer_music.set_volume(0.25)
+                    pygame.mixer_music.play(-1)
 
+                elif btn_exit.rect.collidepoint(x, y):
+                    game = False
+            
+            if event.type == pygame.MOUSEMOTION:
+                x, y = event.pos
+                if btn_start.rect.collidepoint(x, y):
+                    btn_start.color = btn_start.action_color
+                
+                elif btn_settings.rect.collidepoint(x, y):
+                    btn_settings.color = btn_settings.action_color
+
+                elif btn_exit.rect.collidepoint(x, y):
+                    btn_exit.color = btn_exit.action_color
+
+                else:
+                    btn_start.color = btn_start.background_color
+                    btn_settings.color = btn_settings.background_color
+                    btn_exit.color = btn_exit.background_color
 
     if level == 1:
         window.blit(background, (0, 0))
@@ -517,6 +602,8 @@ while game:
         enemies.draw(window)
         enemies.update()
         finish.show()
+        bullets.draw(window)
+        bullets.update()
 
         if pygame.sprite.collide_rect(player, finish):
             level = 10
@@ -531,6 +618,16 @@ while game:
             pygame.mixer_music.load(file_path(r"musics_labirint\lose1.mp3"))
             pygame.mixer_music.set_volume(0.10)
             pygame.mixer_music.play(1)
+        
+        pygame.sprite.groupcollide(bullets, walls, True, False)
+        pygame.sprite.groupcollide(bullets, enemies, True, True)
+
+    elif level == 0:
+        window.fill(BLACK)
+        btn_start.show()
+        btn_settings.show()
+        btn_exit.show()
+        window.blit(game_name, (150, 40))
 
     elif level == 10:
         window.blit(victory_image, (0, 0))
