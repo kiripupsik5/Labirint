@@ -16,6 +16,9 @@ GREEN = (15, 245, 7)
 PINK = (245, 7, 130)
 WHITE = (255, 255, 255)
 BLUE = (47, 0, 255)
+ORANGE = (255, 132, 0)
+PURPLE = (208, 0, 255)
+RED = (255, 0, 0)
 
 
 pygame.mixer_music.load(file_path(r"musics_labirint\win1.mp3"))
@@ -27,6 +30,9 @@ music_shoot.set_volume(0.25)
 
 background = pygame.image.load(file_path(r"images_labirint\black fon.jpg"))
 background = pygame.transform.scale(background, (WIN_WIDTH, WIN_HEIGHT))
+
+bye_fon = pygame.image.load(file_path(r"images_labirint\bye.png"))
+bye_fon = pygame.transform.scale(bye_fon, (300, 300))
 
 victory_image = pygame.image.load(r"images_labirint\WINNER FON.png")
 victory_image = pygame.transform.scale(victory_image, (WIN_WIDTH, WIN_HEIGHT))
@@ -44,6 +50,21 @@ class Button():
         self.action_color = action_color
         self.color = background_color
         shrift = pygame.font.SysFont("Helvetica", 55)
+        self.text = shrift.render(text, True, text_color)
+        self.text_x = text_x
+        self.text_y = text_y
+
+    def show(self):
+        pygame.draw.rect(window, self.color, self.rect)
+        window.blit(self.text, (self.rect.x + self.text_x, self.rect.y + self.text_y))
+
+class Arrow():
+    def __init__(self, x, y, width, height, background_color, action_color, text, text_color, text_x, text_y):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.background_color = background_color
+        self.action_color = action_color
+        self.color = background_color
+        shrift = pygame.font.SysFont("Comic sans", 25)
         self.text = shrift.render(text, True, text_color)
         self.text_x = text_x
         self.text_y = text_y
@@ -175,11 +196,7 @@ enemies.add(enemy1)
 enemies.add(enemy2)
 enemies.add(enemy3)
 
-
-
 bullets = pygame.sprite.Group()
-
-
 
 #название стен_расположение стен v-vertical,  h-horizontal_номер рядка в котором расположенны стены_номер редактируемой стены
 walls = pygame.sprite.Group()
@@ -531,6 +548,32 @@ btn_settings = Button(100, 325, 400, 100, GREEN, BLUE, "SETTINGS", PINK, 85, 20)
 btn_exit = Button(200, 450, 200, 100, GREEN, BLUE, "EXIT", PINK, 50, 20)
 game_name = pygame.font.SysFont("Arial", 105, 1).render("POTOM", True, WHITE)
 
+btn_bye = Button(200, 475, 200, 100, GREEN, BLUE, "EXIT", PINK, 50, 20)
+btn_back = Button(5, 5, 127, 65, GREEN, BLUE, "BACK", PINK, 1, 1)
+btn_start_settings = Button(225, 500, 150, 65, GREEN, BLUE, "START", PINK, 1, 1)
+btn_arrow_right = Arrow(450, 400, 48, 18, ORANGE, BLUE, "NEXT", RED, 1, 1)
+btn_arrow_left = Arrow(102, 400, 47, 18, ORANGE, BLUE, "LAST", RED, 1, 1)
+
+btn_arrow_plus_fon1 = Arrow(550, 25, 13, 22, ORANGE, BLUE, "+", RED, 1, 1)
+btn_arrow_plus_win1 = Arrow(550, 75, 13, 22, ORANGE, BLUE, "+", RED, 1, 1)
+btn_arrow_plus_lose1 = Arrow(550, 125, 13, 22, ORANGE, BLUE, "+", RED, 1, 1)
+
+btn_arrow_minus_fon1 = Arrow(492, 25, 8, 22, ORANGE, BLUE, "-", RED, 1, 1)
+btn_arrow_minus_win1 = Arrow(492, 75, 8, 22, ORANGE, BLUE, "-", RED, 1, 1)
+btn_arrow_minus_lose1 = Arrow(492, 125, 8, 22, ORANGE, BLUE, "-", RED, 1, 1)
+
+txt_volume_fon1 = pygame.font.SysFont("Arial", 25, 1).render("VOLUME FON MUSIC", True, WHITE)
+txt_volume_win1 = pygame.font.SysFont("Arial", 25, 1).render("VOLUME WIN MUSIC", True, WHITE)
+txt_volume_lose1 = pygame.font.SysFont("Arial", 25, 1).render("VOLUME LOSE MUSIC", True, WHITE)
+
+volume_fon1 = 0.25
+volume_win1 = 0.10
+volume_lose1 = 0.10
+
+txt_volume_number_fon1 = pygame.font.SysFont("Arial", 25, 1).render(str(volume_fon1), True, WHITE)
+txt_volume_number_win1 = pygame.font.SysFont("Arial", 25, 1).render(str(volume_win1), True, WHITE)
+txt_volume_number_lose1 = pygame.font.SysFont("Arial", 25, 1).render(str(volume_lose1), True, WHITE)
+
 level = 0
 
 game = True
@@ -540,6 +583,7 @@ while game:
             game = False
 
         if level == 1:
+            pygame.mixer_music.stop()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     player.speed_x = -2.5
@@ -575,8 +619,15 @@ while game:
                     pygame.mixer_music.set_volume(0.25)
                     pygame.mixer_music.play(-1)
 
+                elif btn_settings.rect.collidepoint(x, y):
+                    level = 2
+
                 elif btn_exit.rect.collidepoint(x, y):
-                    game = False
+                    level = "bye"
+                    pygame.mixer_music.stop()
+                    pygame.mixer_music.load(file_path(r"musics_labirint\bye1.mp3"))
+                    pygame.mixer_music.set_volume(1)
+                    pygame.mixer_music.play(-1)
             
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
@@ -593,6 +644,86 @@ while game:
                     btn_start.color = btn_start.background_color
                     btn_settings.color = btn_settings.background_color
                     btn_exit.color = btn_exit.background_color
+        
+        elif level == 2:
+            pygame.mixer_music.stop()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if btn_back.rect.collidepoint(x, y):
+                    level = 0
+                
+                elif btn_start_settings.rect.collidepoint(x, y):
+                    level = 1
+                
+                elif btn_arrow_plus_fon1.rect.collidepoint(x, y):
+                    volume_fon1 += 0.05
+                    pygame.mixer_music.set_volume(volume_fon1)
+            
+            if event.type == pygame.MOUSEMOTION:
+                x, y = event.pos
+                if btn_back.rect.collidepoint(x, y):
+                    btn_back.color = btn_back.action_color
+
+                elif btn_start_settings.rect.collidepoint(x, y):
+                    btn_start_settings.color = btn_start_settings.action_color
+                    
+                elif btn_arrow_right.rect.collidepoint(x, y):
+                    btn_arrow_right.color = btn_arrow_right.action_color
+
+                elif btn_arrow_left.rect.collidepoint(x, y):
+                    btn_arrow_left.color = btn_arrow_left.action_color
+                
+                elif btn_arrow_plus_fon1.rect.collidepoint(x, y):
+                    btn_arrow_plus_fon1.color = btn_arrow_plus_fon1.action_color
+
+                elif btn_arrow_plus_win1.rect.collidepoint(x, y):
+                    btn_arrow_plus_win1.color = btn_arrow_plus_win1.action_color
+
+                elif btn_arrow_plus_lose1.rect.collidepoint(x, y):
+                    btn_arrow_plus_lose1.color = btn_arrow_plus_lose1.action_color
+
+                elif btn_arrow_minus_fon1.rect.collidepoint(x, y):
+                    btn_arrow_minus_fon1.color = btn_arrow_minus_fon1.action_color
+
+                elif btn_arrow_minus_win1.rect.collidepoint(x, y):
+                    btn_arrow_minus_win1.color = btn_arrow_minus_win1.action_color
+
+                elif btn_arrow_minus_lose1.rect.collidepoint(x, y):
+                    btn_arrow_minus_lose1.color = btn_arrow_minus_lose1.action_color
+
+                else:
+                    btn_back.color = btn_back.background_color
+                    btn_start_settings.color = btn_start_settings.background_color
+                    btn_arrow_right.color = btn_arrow_right.background_color
+                    btn_arrow_left.color = btn_arrow_left.background_color
+                    btn_arrow_plus_fon1.color = btn_arrow_plus_fon1.background_color
+                    btn_arrow_plus_win1.color = btn_arrow_plus_win1.background_color
+                    btn_arrow_plus_lose1.color = btn_arrow_plus_lose1.background_color
+                    btn_arrow_minus_fon1.color = btn_arrow_minus_fon1.background_color
+                    btn_arrow_minus_win1.color = btn_arrow_minus_win1.background_color
+                    btn_arrow_minus_lose1.color = btn_arrow_minus_lose1.background_color
+
+        elif level == "bye":
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                if btn_bye.rect.collidepoint(x, y):
+                    game = False
+
+                elif btn_back.rect.collidepoint(x, y):
+                    level = 0
+            
+            if event.type == pygame.MOUSEMOTION:
+                x, y = event.pos
+                if btn_bye.rect.collidepoint(x, y):
+                    btn_bye.color = btn_bye.action_color
+                
+                elif btn_back.rect.collidepoint(x, y):
+                    btn_back.color = btn_back.action_color
+                
+                else:
+                    btn_bye.color = btn_bye.background_color
+                    btn_back.color = btn_back.background_color
+
 
     if level == 1:
         window.blit(background, (0, 0))
@@ -628,6 +759,32 @@ while game:
         btn_settings.show()
         btn_exit.show()
         window.blit(game_name, (150, 40))
+
+    elif level == 2:
+        window.fill(BLACK)
+        btn_back.show()
+        btn_start_settings.show()
+        btn_arrow_right.show()
+        btn_arrow_left.show()
+        btn_arrow_plus_fon1.show()
+        btn_arrow_plus_win1.show()
+        btn_arrow_plus_lose1.show()
+        btn_arrow_minus_fon1.show()
+        btn_arrow_minus_win1.show()
+        btn_arrow_minus_lose1.show()
+        window.blit(txt_volume_fon1, (250, 21))
+        window.blit(txt_volume_win1, (251, 71))
+        window.blit(txt_volume_lose1, (243, 121))
+        window.blit(txt_volume_number_fon1, (505, 21))
+        window.blit(txt_volume_number_win1, (505, 71))
+        window.blit(txt_volume_number_lose1, (505, 121))
+        
+
+    elif level == "bye":
+        window.fill(BLACK)
+        btn_bye.show()
+        window.blit(bye_fon, (150, 150))
+        btn_back.show()
 
     elif level == 10:
         window.blit(victory_image, (0, 0))
